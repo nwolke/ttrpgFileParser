@@ -31,25 +31,24 @@ def _validate_directory(directory: str) -> Path:
     Raises:
         FileNotFoundError: If the path does not exist.
         NotADirectoryError: If the path is not a directory.
-        PermissionError: If the path escapes the configured ``TTRPG_BASE_DIR``.
+        PermissionError: If the path is outside ``settings.base_dir``.
     """
     root = Path(directory).resolve()
+    allowed = settings.base_dir.resolve()
+
+    # Reject any path that escapes the configured base directory.
+    try:
+        root.relative_to(allowed)
+    except ValueError:
+        raise PermissionError(
+            f"Directory {directory!r} is outside the allowed base path "
+            f"({allowed}).  Set TTRPG_BASE_DIR to change the restriction."
+        )
 
     if not root.exists():
         raise FileNotFoundError(f"Directory not found: {directory!r}")
     if not root.is_dir():
         raise NotADirectoryError(f"Not a directory: {directory!r}")
-
-    # When a base directory is configured, reject any path outside it.
-    if settings.base_dir is not None:
-        allowed = settings.base_dir.resolve()
-        try:
-            root.relative_to(allowed)
-        except ValueError:
-            raise PermissionError(
-                f"Directory {directory!r} is outside the allowed base path "
-                f"({allowed}).  Set TTRPG_BASE_DIR to change the restriction."
-            )
 
     return root
 

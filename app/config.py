@@ -1,7 +1,6 @@
 """Application configuration via environment variables or defaults."""
 
 from pathlib import Path
-from typing import Optional
 from pydantic_settings import BaseSettings
 
 
@@ -25,10 +24,11 @@ class Settings(BaseSettings):
     top_k_results: int = 10
 
     # Optional root directory that restricts which paths can be catalogued.
-    # When set, all catalogue requests must target a path inside this root.
-    # When unset, any path on the local filesystem is accepted (suitable for
-    # a locally-run, single-user installation).
-    base_dir: Optional[Path] = None
+    # Defaults to the user's home directory.  Override with TTRPG_BASE_DIR to
+    # allow cataloguing a different root (e.g. a network share).  All catalogue
+    # requests must target a path inside this root; requests outside it are
+    # rejected with HTTP 403.
+    base_dir: Path = Path.home()
 
     model_config = {"env_prefix": "TTRPG_"}
 

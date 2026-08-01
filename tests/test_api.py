@@ -13,6 +13,10 @@ def use_temp_db(tmp_path, monkeypatch):
     db_file = tmp_path / "test.db"
     monkeypatch.setattr("app.config.settings.db_path", db_file)
     monkeypatch.setattr("app.config.settings.data_dir", tmp_path)
+    # Allow cataloguing under tmp_path (tests use subdirs of it).
+    monkeypatch.setattr("app.config.settings.base_dir", tmp_path)
+    monkeypatch.setattr("app.cataloguer.settings.base_dir", tmp_path)
+    monkeypatch.setattr("app.cataloguer.settings.db_path", db_file)
 
     # Re-init the database so the app lifespan finds the new path.
     from app import database as db
@@ -51,8 +55,9 @@ def test_delete_file_not_found(client):
 # /catalogue                                                                    #
 # --------------------------------------------------------------------------- #
 
-def test_catalogue_invalid_directory(client):
-    response = client.post("/catalogue", json={"directory": "/nonexistent/path/xyz"})
+def test_catalogue_invalid_directory(client, tmp_path):
+    # Path inside base_dir but nonexistent → 400
+    response = client.post("/catalogue", json={"directory": str(tmp_path / "nonexistent_subdir")})
     assert response.status_code == 400
 
 
@@ -68,6 +73,7 @@ def test_catalogue_rejects_path_outside_base_dir(client, tmp_path, monkeypatch):
     allowed.mkdir()
     outside = tmp_path / "outside"
     outside.mkdir()
+    # Point base_dir at allowed; outside must be rejected.
     monkeypatch.setattr("app.config.settings.base_dir", allowed)
     monkeypatch.setattr("app.cataloguer.settings.base_dir", allowed)
     response = client.post("/catalogue", json={"directory": str(outside)})
