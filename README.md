@@ -43,6 +43,7 @@ All settings are read from environment variables (prefix `TTRPG_`):
 | `TTRPG_CHUNK_SIZE` | `500` | Characters per text chunk |
 | `TTRPG_CHUNK_OVERLAP` | `50` | Overlap characters between chunks |
 | `TTRPG_TOP_K_RESULTS` | `10` | Default number of search results |
+| `TTRPG_BASE_DIR` | *(unset)* | Optional: restrict cataloguing to this directory tree.  When set, any `POST /catalogue` request targeting a path outside this root is rejected with HTTP 403. |
 
 ---
 

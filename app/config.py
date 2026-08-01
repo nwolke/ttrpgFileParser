@@ -1,6 +1,7 @@
 """Application configuration via environment variables or defaults."""
 
 from pathlib import Path
+from typing import Optional
 from pydantic_settings import BaseSettings
 
 
@@ -22,6 +23,12 @@ class Settings(BaseSettings):
 
     # Maximum number of matching files returned by a search.
     top_k_results: int = 10
+
+    # Optional root directory that restricts which paths can be catalogued.
+    # When set, all catalogue requests must target a path inside this root.
+    # When unset, any path on the local filesystem is accepted (suitable for
+    # a locally-run, single-user installation).
+    base_dir: Optional[Path] = None
 
     model_config = {"env_prefix": "TTRPG_"}
 

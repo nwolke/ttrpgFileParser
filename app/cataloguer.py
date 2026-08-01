@@ -25,6 +25,35 @@ class CatalogueStats:
     errors: list[str] = field(default_factory=list)
 
 
+def _validate_directory(directory: str) -> Path:
+    """Resolve and validate the target directory.
+
+    Raises:
+        FileNotFoundError: If the path does not exist.
+        NotADirectoryError: If the path is not a directory.
+        PermissionError: If the path escapes the configured ``TTRPG_BASE_DIR``.
+    """
+    root = Path(directory).resolve()
+
+    if not root.exists():
+        raise FileNotFoundError(f"Directory not found: {directory!r}")
+    if not root.is_dir():
+        raise NotADirectoryError(f"Not a directory: {directory!r}")
+
+    # When a base directory is configured, reject any path outside it.
+    if settings.base_dir is not None:
+        allowed = settings.base_dir.resolve()
+        try:
+            root.relative_to(allowed)
+        except ValueError:
+            raise PermissionError(
+                f"Directory {directory!r} is outside the allowed base path "
+                f"({allowed}).  Set TTRPG_BASE_DIR to change the restriction."
+            )
+
+    return root
+
+
 def catalogue_directory(directory: str, recursive: bool = True) -> CatalogueStats:
     """Scan *directory*, parse every supported file, and update the index.
 
@@ -35,11 +64,7 @@ def catalogue_directory(directory: str, recursive: bool = True) -> CatalogueStat
     Returns:
         A :class:`CatalogueStats` summary of what was processed.
     """
-    root = Path(directory).resolve()
-    if not root.exists():
-        raise FileNotFoundError(f"Directory not found: {directory!r}")
-    if not root.is_dir():
-        raise NotADirectoryError(f"Not a directory: {directory!r}")
+    root = _validate_directory(directory)
 
     stats = CatalogueStats()
     store = VectorStore(settings.db_path)

@@ -63,6 +63,17 @@ def test_catalogue_not_a_directory(client, tmp_path):
     assert response.status_code == 400
 
 
+def test_catalogue_rejects_path_outside_base_dir(client, tmp_path, monkeypatch):
+    allowed = tmp_path / "allowed"
+    allowed.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    monkeypatch.setattr("app.config.settings.base_dir", allowed)
+    monkeypatch.setattr("app.cataloguer.settings.base_dir", allowed)
+    response = client.post("/catalogue", json={"directory": str(outside)})
+    assert response.status_code == 403
+
+
 def test_catalogue_empty_directory(client, tmp_path):
     empty_dir = tmp_path / "to_catalogue"
     empty_dir.mkdir()
