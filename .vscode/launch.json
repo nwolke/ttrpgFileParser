@@ -1,0 +1,37 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run FastAPI (uvicorn)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "app.main:app",
+                "--reload",
+                "--host", "127.0.0.1",
+                "--port", "8000"
+            ],
+            "env": {
+                "TTRPG_DATA_DIR": "${workspaceFolder}/data",
+                "TTRPG_DB_PATH": "${workspaceFolder}/data/ttrpg.db",
+                "TTRPG_BASE_DIR": "${workspaceFolder}"
+            },
+            "cwd": "${workspaceFolder}",
+            "jinja": true,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run pytest",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "tests",
+                "-v"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        }
+    ]
+}

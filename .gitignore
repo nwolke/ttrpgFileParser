@@ -22,7 +22,6 @@ ENV/
 htmlcov/
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
